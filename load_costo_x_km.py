@@ -835,13 +835,197 @@ def add_reports_stops(cursor):
 
             data_reports_stops = (reports_stops_dictionary.get("deviceId"), reports_stops_dictionary.get("deviceName"), reports_stops_dictionary.get("distance"), reports_stops_dictionary.get("averageSpeed"), reports_stops_dictionary.get("maxSpeed"), reports_stops_dictionary.get("spentFuel"), reports_stops_dictionary.get("startOdometer"), reports_stops_dictionary.get("endOdometer"), reports_stops_dictionary.get("positionId"), reports_stops_dictionary.get("latitude"), reports_stops_dictionary.get("longitude"), reports_stops_dictionary.get("startTime"), reports_stops_dictionary.get("endTime"), reports_stops_dictionary.get("address"), reports_stops_dictionary.get("duration"), reports_stops_dictionary.get("engineHours"))
 
-            # insert a new user
+            # insert a new stop summary
             num_reports_stops_added += cursor.execute(add_reports_stops, data_reports_stops)
         if num_reports_stops_added > 0:
             print("Successfully added " + str(num_reports_stops_added) + " reports stop row(s) for device ", device)
         else:
             print("No data returned from API so no user reports stop added for device ", device)
 
+def add_reports_summary(cursor):
+    REPORTS_SUMMARY_URL = "http://gps.nextop.vip/api/reports/summary"
+    reports_summry_from = "2018-10-22T18:30:00Z" # TODO - change this to date from begining of system
+    reports_summary_to = "2018-12-12T18:30:00Z"   # TODO - change this to current date in string format
+
+    # print("device_list: ", device_list)
+    for device in device_list:
+        print('deviceId: ', device)
+
+        reports_summary_device_id = device
+        REPORTS_SUMMARY_PARAMS = {'deviceId': reports_summary_device_id, 'from':reports_summry_from, 'to':reports_summary_to}
+
+        #retrieve reports summary from restful get request to nextop api
+        # print('REPORTS_STOPS_URL = ', REPORTS_STOPS_URL, '\nREPORTS_STOPS_PARAMS = ', REPORTS_STOPS_PARAMS)
+        response_reports_summary = requests.get(REPORTS_SUMMARY_URL, REPORTS_SUMMARY_PARAMS, auth=('nextop','nextop123'))
+        # print('response_reports_stops = ', response_reports_stops)
+        json_reports_summary = response_reports_summary.json()
+        # pprint(json_reports_summary)
+        num_reports_summary_added = 0;
+
+        for report_summary in json_reports_summary:
+            reports_summary_dictionary = {}
+            # print("user type: ", type(report_summary))
+            for key, value in report_summary.items():
+                #print(str(key) + ": " + str(value))
+                if key == 'deviceId':
+                    reports_summary_dictionary['deviceId'] = value
+                elif key == 'deviceName':
+                    reports_summary_dictionary['deviceName'] = value
+                elif key == 'distance':
+                    reports_summary_dictionary['distance'] = value
+                elif key == 'averageSpeed':
+                    reports_summary_dictionary['averageSpeed'] = value
+                elif key == 'maxSpeed':
+                    reports_summary_dictionary['maxSpeed'] = value
+                elif key == 'spentFuel':
+                    reports_summary_dictionary['spentFuel'] = value
+                elif key == 'startOdometer':
+                    reports_summary_dictionary['startOdometer'] = value
+                elif key == 'endOdometer':
+                    reports_summary_dictionary['endOdometer'] = value
+                elif key == 'enginehours':
+                    reports_summary_dictionary['engineHours'] = value
+
+            add_reports_summary = """INSERT INTO `report_summary`(`deviceId`, `deviceName`, `distance`, `averageSpeed`, `maxSpeed`, `spentFuel`, `startOdometer`, `endOdometer`, `engineHours`) VALUES("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")"""
+
+            data_reports_summary = (reports_summary_dictionary.get("deviceId"), reports_summary_dictionary.get("deviceName"), reports_summary_dictionary.get("distance"), reports_summary_dictionary.get("averageSpeed"), reports_summary_dictionary.get("maxSpeed"), reports_summary_dictionary.get("spentFuel"), reports_summary_dictionary.get("startOdometer"), reports_summary_dictionary.get("endOdometer"), reports_summary_dictionary.get("engineHours"))
+
+            # insert a new summary report
+            num_reports_summary_added += cursor.execute(add_reports_summary, data_reports_summary)
+        if num_reports_summary_added > 0:
+            print("Successfully added " + str(num_reports_summary_added) + " report summary row(s) for device ", device)
+        else:
+            print("No data returned from API so no user report summary added for device ", device)
+
+def add_reports_trips(cursor):
+    REPORTS_TRIPS_URL = "http://gps.nextop.vip/api/reports/trips"
+    reports_trips_from = "2018-10-22T18:30:00Z" # TODO - change this to date from begining of system
+    reports_trips_to = "2018-12-12T18:30:00Z"   # TODO - change this to current date in string format
+
+    # print("device_list: ", device_list)
+    for device in device_list:
+        print('deviceId: ', device)
+
+        reports_trips_device_id = device
+        REPORTS_TRIPS_PARAMS = {'deviceId': reports_trips_device_id, 'from':reports_trips_from, 'to':reports_trips_to}
+
+        #retrieve reports trips from restful get request to nextop api
+        REPORTS_TRIPS_PARAMS = {'deviceId': reports_trips_device_id, 'from':reports_trips_from, 'to':reports_trips_to}
+        response_reports_trips = requests.get(REPORTS_TRIPS_URL, REPORTS_TRIPS_PARAMS, auth=('nextop','nextop123'))
+        # print('response_reports_trips = ', response_reports_trips)
+        json_reports_trips = response_reports_trips.json()
+        # pprint(json_reports_stops)
+        num_reports_trips_added = 0;
+
+        for report_trips in json_reports_trips:
+            reports_trips_dictionary = {}
+            # print("user type: ", type(report_trips))
+            for key, value in report_trips.items():
+                #print(str(key) + ": " + str(value))
+                if key == 'deviceId':
+                    reports_trips_dictionary['deviceId'] = value
+                elif key == 'deviceName':
+                    reports_trips_dictionary['deviceName'] = value
+                elif key == 'distance':
+                    reports_trips_dictionary['distance'] = value
+                elif key == 'averageSpeed':
+                    reports_trips_dictionary['averageSpeed'] = value
+                elif key == 'maxSpeed':
+                    reports_trips_dictionary['maxSpeed'] = value
+                elif key == 'spentFuel':
+                    reports_trips_dictionary['spentFuel'] = value
+                elif key == 'startOdometer':
+                    reports_trips_dictionary['startOdometer'] = value
+                elif key == 'endOdometer':
+                    reports_trips_dictionary['endOdometer'] = value
+                elif key == 'startPositionId':
+                    reports_trips_dictionary['startPositionId'] = value
+                elif key == 'endPositionId':
+                    reports_trips_dictionary['endPositionId'] = value
+                elif key == 'startLat':
+                    reports_trips_dictionary['startLat'] = value
+                elif key == 'startLon':
+                    reports_trips_dictionary['startLon'] = value
+                elif key == 'endLat':
+                    reports_trips_dictionary['endLat'] = value
+                elif key == 'endLon':
+                    reports_trips_dictionary['endLon'] = value
+                elif key == 'startTime':
+                    reports_trips_dictionary['startTime'] = value
+                elif key == 'startAddress':
+                    reports_trips_dictionary['startAddress'] = value
+                elif key == 'endTime':
+                    reports_trips_dictionary['endTime'] = value
+                elif key == 'endAddress':
+                    reports_trips_dictionary['endAddress'] = value
+                elif key == 'duration':
+                    reports_trips_dictionary['duration'] = value
+                elif key == 'driverUniqueId':
+                    reports_trips_dictionary['driverUniqueId'] = value
+                elif key == 'driverName':
+                    reports_trips_dictionary['driverName'] = value
+
+            add_reports_trips = """INSERT INTO `report_trip`(`deviceId`, `deviceName`, `distance`, `averageSpeed`, `maxSpeed`, `spentFuel`, `startOdometer`, `endOdometer`, `startPositionId`, `endPositionId`, `startLat`, `startLon`, `endLat`, `endLon`, `startTime`, `startAddress`, `endTime`, `endAddress`, `duration`, `driverUniqueId`, `driverName`) VALUES("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")"""
+
+            data_reports_trips = (reports_trips_dictionary.get("deviceId"), reports_trips_dictionary.get("deviceName"), reports_trips_dictionary.get("distance"), reports_trips_dictionary.get("averageSpeed"), reports_trips_dictionary.get("maxSpeed"), reports_trips_dictionary.get("spentFuel"), reports_trips_dictionary.get("startOdometer"), reports_trips_dictionary.get("endOdometer"), reports_trips_dictionary.get("startPositionId"), reports_trips_dictionary.get("endPositionId"), reports_trips_dictionary.get("startLat"), reports_trips_dictionary.get("startLon"), reports_trips_dictionary.get("endLat"), reports_trips_dictionary.get("endLon"), reports_trips_dictionary.get("startTime"), reports_trips_dictionary.get("startAddress"),reports_trips_dictionary.get("endTime"), reports_trips_dictionary.get("endAddress"), reports_trips_dictionary.get("duration"), reports_trips_dictionary.get("driverUniqueId"), reports_trips_dictionary.get("driverName"))
+
+            # insert a new trip report
+            num_reports_trips_added += cursor.execute(add_reports_trips, data_reports_trips)
+        if num_reports_trips_added > 0:
+            print("Successfully added " + str(num_reports_trips_added) + " trip report row(s) for device ", device)
+        else:
+            print("No data returned from API so no trip report added for device ", device)
+
+def add_reports_events(cursor):
+    REPORTS_EVENTS_URL = "http://gps.nextop.vip/api/reports/events"
+    reports_trips_from = "2018-10-22T18:30:00Z" # TODO - change this to date from begining of system
+    reports_trips_to = "2018-12-12T18:30:00Z"   # TODO - change this to current date in string format
+
+    # print("device_list: ", device_list)
+    for device in device_list:
+        print('deviceId: ', device)
+
+        reports_events_device_id = device
+        REPORTS_EVENTS_PARAMS = {'deviceId': reports_events_device_id, 'from':reports_trips_from, 'to':reports_trips_to}
+
+        #retrieve reports events from restful get request to nextop api
+        REPORTS_EVENTS_PARAMS = {'deviceId': reports_events_device_id, 'from':reports_trips_from, 'to':reports_trips_to}
+        response_reports_events = requests.get(REPORTS_EVENTS_URL, REPORTS_EVENTS_PARAMS, auth=('nextop','nextop123'))
+        # print('response_reports_events = ', response_reports_events)
+        json_reports_events = response_reports_events.json()
+        # pprint(json_reports_events)
+        num_event_reports_added = 0;
+
+        for report_trips in json_reports_events:
+            reports_events_dictionary = {}
+            # print("user type: ", type(report_events))
+            for key, value in report_trips.items():
+                #print(str(key) + ": " + str(value))
+                if key == 'id':
+                    reports_events_dictionary['id'] = value
+                elif key == 'attributes':
+                    reports_events_dictionary['attributes'] = value
+                elif key == 'deviceId':
+                    reports_events_dictionary['deviceId'] = value
+                elif key == 'serverTime':
+                    reports_events_dictionary['serverTime'] = value
+                elif key == 'positionId':
+                    reports_events_dictionary['positionId'] = value
+                elif key == 'geoFenceId':
+                    reports_events_dictionary['geoFenceId'] = value
+                elif key == 'maintenanceId':
+                    reports_events_dictionary['maintenanceId'] = value
+
+            add_reports_events = """INSERT INTO `report_event`(`id`, `attributes`, `deviceId`, `serverTime`, `positionId`, `geoFenceId`, `maintenanceId`) VALUES("%s", "%s", "%s", "%s", "%s", "%s", "%s")"""
+
+            data_reports_events = (reports_events_dictionary.get("id"), reports_events_dictionary.get("attributes"), reports_events_dictionary.get("deviceId"), reports_events_dictionary.get("serverTime"), reports_events_dictionary.get("positionId"), reports_events_dictionary.get("geoFenceId"), reports_events_dictionary.get("maintenanceId"))
+
+            # insert a new event report
+            num_event_reports_added += cursor.execute(add_reports_events, data_reports_events)
+        if num_event_reports_added > 0:
+            print("Successfully added " + str(num_event_reports_added) + " event report row(s) for device ", device)
+        else:
+            print("No data returned from API so no event report added for device ", device)
 
 try:
     # connect to costxkm db
@@ -866,16 +1050,17 @@ try:
     # add_positions(cursor)
 
     # add_servers(cursor)
-# /session  GET ???  IN API reference but not at bottom of API reference
+# /session  GET ???  AT top of API reference but not at bottom of API reference
     # add_statistics(cursor)
     # add_users(cursor)
 
 
     # TODO_LIST
-    add_reports_stops(cursor)
-    # add_reports_events(cursor)
-    # add report_summary(cursor)
-    # add reports_trips(cursor)
+    # add_reports_stops(cursor)
+    # add_reports_summary(cursor)
+    # add_reports_trips(cursor)
+    add_reports_events(cursor) # TODO CREATE TABLE
+
 
 
     # commit data to db
