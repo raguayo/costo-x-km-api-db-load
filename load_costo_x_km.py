@@ -11,6 +11,8 @@ DB_PASSWORD = "root"
 DB_NAME = "costxkm"
 DB_CHARSET = "utf8mb4"
 
+device_list = []
+
 
 def add_devices(cursor):
     DEVICE_URL = "http://gps.nextop.vip/api/devices"
@@ -44,6 +46,7 @@ def add_devices(cursor):
             #print(str(key) + ": " + str(value))
             if key == 'id':
                 device_dictionary['id'] = value
+                device_list.append(str(value))
                 # id = value
             elif key == 'name':
                 device_dictionary['name'] = value
@@ -120,8 +123,8 @@ def add_devices(cursor):
 
 def add_statistics(cursor):
     STATISTICS_URL= "http://gps.nextop.vip/api/statistics"
-    statistics_from = "2018-10-22T18:30:00Z"
-    statistics_to = "2018-12-02T18:30:00Z"
+    statistics_from = "2018-10-22T18:30:00Z" # TODO - change this to date from begining of system
+    statistics_to = "2018-12-011T18:30:00Z"   # TODO - change this to current date in string format
     STATISTICS_PARAMS = {'from':statistics_from, 'to':statistics_to}
 
     #retrieve statistics from restful get request to nextop api
@@ -136,6 +139,8 @@ def add_statistics(cursor):
             #print(str(key) + ": " + str(value))
             if key == 'id':
                 statistic_dictionary['id'] = value
+            elif key == 'attributes':
+                statistic_dictionary['attributes'] = value
             elif key == 'activeDevices':
                 statistic_dictionary['activeDevices'] = value
             elif key == 'activeUsers':
@@ -159,9 +164,9 @@ def add_statistics(cursor):
 
             # pprint(statistic_dictionary.get("activeDevices"))
 
-        add_statistic = """INSERT INTO statistic(id, captureTime, activeUsers, activeDevices, requests, messagesReceived, messagesStored, geocoderRequests, geolocationRequests, mailSent, smsSent) VALUES("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")"""
+        add_statistic = """INSERT INTO statistic(id, attributes, captureTime, activeUsers, activeDevices, requests, messagesReceived, messagesStored, geocoderRequests, geolocationRequests, mailSent, smsSent) VALUES("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")"""
 
-        data_statistic = (statistic_dictionary.get("id"), statistic_dictionary.get("captureTime"), statistic_dictionary.get("activeUsers"), statistic_dictionary.get("activeDevices"), statistic_dictionary.get("requests"), statistic_dictionary.get("messagesReceived"), statistic_dictionary.get("messagesStored"), statistic_dictionary.get("geocoderRequests"), statistic_dictionary.get("geolocationRequests"), statistic_dictionary.get("mailSent"), statistic_dictionary.get("smsSent"))
+        data_statistic = (statistic_dictionary.get("id"), statistic_dictionary.get("attributes"), statistic_dictionary.get("captureTime"), statistic_dictionary.get("activeUsers"), statistic_dictionary.get("activeDevices"), statistic_dictionary.get("requests"), statistic_dictionary.get("messagesReceived"), statistic_dictionary.get("messagesStored"), statistic_dictionary.get("geocoderRequests"), statistic_dictionary.get("geolocationRequests"), statistic_dictionary.get("mailSent"), statistic_dictionary.get("smsSent"))
 
         # insert a new statistic
         num_stats_added += cursor.execute(add_statistic, data_statistic)
@@ -687,6 +692,157 @@ def add_servers(cursor):
     else:
         print("No data returned from API so no server rows added.")
 
+def add_users(cursor):
+    USER_URL = "http://gps.nextop.vip/api/users"
+
+    #retrieve positions from restful get request to nextop api
+    response_user = requests.get(USER_URL, auth=('nextop','nextop123'))
+    json_users = response_user.json()
+    # pprint(json_user)
+    num_users_added = 0;
+
+    for user in json_users:
+        user_dictionary = {}
+        # print("user type: ", type(user))
+        for key, value in user.items():
+            #print(str(key) + ": " + str(value))
+            if key == 'id':
+                user_dictionary['id'] = value
+            elif key == 'attributes':
+                user_dictionary['attributes'] = value
+
+                #TODO: try wrapping open and close brackets around value for json_str and then set to user_dictionary['attributes']
+                # json_str = "{"
+                # print("attributes value type is: ", type(value))
+                # for key, value in value.items():
+                #     json_str += "'" + str(key) + "':'" + str(value) + "',"
+                    # print("key: ", key, ", value: ", value)
+                # json_str += "}"
+                # print("json_str = ", json_str)
+                # user_dictionary['attributes'] = json_str
+                # print("user_dictionary['attributes'] = ", user_dictionary['attributes'])
+                # print("type(json_str): ", type(json_str))
+            elif key == 'name':
+                user_dictionary['name'] = value
+            elif key == 'email':
+                user_dictionary['email'] = value
+            elif key == 'readonly':
+                user_dictionary['readonly'] = value
+            elif key == 'administrator':
+                user_dictionary['administrator'] = value
+            elif key == 'map':
+                user_dictionary['map'] = value
+            elif key == 'latitude':
+                user_dictionary['latitude'] = value
+            elif key == 'longitude':
+                user_dictionary['longitude'] = value
+            elif key == 'zoom':
+                user_dictionary['zoom'] = value
+            elif key == 'password':
+                user_dictionary['password'] = value
+            elif key == 'twelveHourFormat':
+                user_dictionary['twelveHourFormat'] = value
+            elif key == 'coordinateFormat':
+                user_dictionary['coordinateFormat'] = value
+            elif key == 'disabled':
+                user_dictionary['disabled'] = value
+            elif key == 'expirationTime':
+                user_dictionary['expirationTime'] = value
+            elif key == 'deviceLimit':
+                user_dictionary['deviceLimit'] = value
+            elif key == 'userLimit':
+                user_dictionary['userLimit'] = value
+            elif key == 'deviceReadonly':
+                user_dictionary['deviceReadonly'] = value
+            elif key == 'limitCommands':
+                user_dictionary['limitCommands'] = value
+            elif key == 'poiLayer':
+                user_dictionary['poiLayer'] = value
+            elif key == 'token':
+                user_dictionary['token'] = value
+
+
+        add_users = """INSERT INTO `user`(`id`, `attributes`, `name`, `email`, `readonly`, `administrator`, `map`, `latitude`, `longitude`, `zoom`, `password`, `twelveHourFormat`, `coordinateFormat`, `disabled`, `expirationTime`, `deviceLimit`, `userLimit`, `deviceReadonly`, `limitCommands`, `poiLayer`, `token`) VALUES("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")"""
+
+        data_users = (user_dictionary.get("id"), user_dictionary.get("attributes"), user_dictionary.get("name"), user_dictionary.get("email"), user_dictionary.get("readonly"), user_dictionary.get("administrator"), user_dictionary.get("map"), user_dictionary.get("latitude"), user_dictionary.get("longitude"), user_dictionary.get("zoom"), user_dictionary.get("password"), user_dictionary.get("twelveHourFormat"), user_dictionary.get("coordinateFormat"), user_dictionary.get("disabled"), user_dictionary.get("expirationTime"), user_dictionary.get("deviceLimit"), user_dictionary.get("userLimit"), user_dictionary.get("deviceReadonly"), user_dictionary.get("limitCommands"), user_dictionary.get("poiLayer"), user_dictionary.get("token"))
+
+        # insert a new user
+        num_users_added += cursor.execute(add_users, data_users)
+    if num_users_added > 0:
+        print("Successfully added " + str(num_users_added) + " user row(s).")
+    else:
+        print("No data returned from API so no user rows added.")
+
+def add_reports_stops(cursor):
+    REPORTS_STOPS_URL = "http://gps.nextop.vip/api/reports/stops"
+    reports_stops_from = "2018-10-22T18:30:00Z" # TODO - change this to date from begining of system
+    reports_stops_to = "2018-12-11T18:30:00Z"   # TODO - change this to current date in string format
+
+    # print("device_list: ", device_list)
+    for device in device_list:
+        print('deviceId: ', device)
+
+        reports_stops_device_id = device
+        REPORTS_STOPS_PARAMS = {'deviceId': reports_stops_device_id, 'from':reports_stops_from, 'to':reports_stops_to}
+
+        #retrieve reports stops from restful get request to nextop api
+        # print('REPORTS_STOPS_URL = ', REPORTS_STOPS_URL, '\nREPORTS_STOPS_PARAMS = ', REPORTS_STOPS_PARAMS)
+        response_reports_stops = requests.get(REPORTS_STOPS_URL, REPORTS_STOPS_PARAMS, auth=('nextop','nextop123'))
+        # print('response_reports_stops = ', response_reports_stops)
+        json_reports_stops = response_reports_stops.json()
+        # pprint(json_reports_stops)
+        num_reports_stops_added = 0;
+
+        for report_stops in json_reports_stops:
+            reports_stops_dictionary = {}
+            # print("user type: ", type(report_stops))
+            for key, value in report_stops.items():
+                #print(str(key) + ": " + str(value))
+                if key == 'deviceId':
+                    reports_stops_dictionary['deviceId'] = value
+                elif key == 'deviceName':
+                    reports_stops_dictionary['deviceName'] = value
+                elif key == 'distance':
+                    reports_stops_dictionary['distance'] = value
+                elif key == 'averageSpeed':
+                    reports_stops_dictionary['averageSpeed'] = value
+                elif key == 'maxSpeed':
+                    reports_stops_dictionary['maxSpeed'] = value
+                elif key == 'spentFuel':
+                    reports_stops_dictionary['spentFuel'] = value
+                elif key == 'startOdometer':
+                    reports_stops_dictionary['startOdometer'] = value
+                elif key == 'endOdometer':
+                    reports_stops_dictionary['endOdometer'] = value
+                elif key == 'positionId':
+                    reports_stops_dictionary['positionId'] = value
+                elif key == 'latitude':
+                    reports_stops_dictionary['latitude'] = value
+                elif key == 'longitude':
+                    reports_stops_dictionary['longitude'] = value
+                elif key == 'startTime':
+                    reports_stops_dictionary['startTime'] = value
+                elif key == 'endTime':
+                    reports_stops_dictionary['endTime'] = value
+                elif key == 'address':
+                    reports_stops_dictionary['address'] = value
+                elif key == 'duration':
+                    reports_stops_dictionary['duration'] = value
+                elif key == 'enginehours':
+                    reports_stops_dictionary['engineHours'] = value
+
+            add_reports_stops = """INSERT INTO `report_stop`(`deviceId`, `deviceName`, `distance`, `averageSpeed`, `maxSpeed`, `spentFuel`, `startOdometer`, `endOdometer`, `positionId`, `latitude`, `longitude`, `startTime`, `endTime`, `address`, `duration`, `engineHours`) VALUES("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")"""
+
+            data_reports_stops = (reports_stops_dictionary.get("deviceId"), reports_stops_dictionary.get("deviceName"), reports_stops_dictionary.get("distance"), reports_stops_dictionary.get("averageSpeed"), reports_stops_dictionary.get("maxSpeed"), reports_stops_dictionary.get("spentFuel"), reports_stops_dictionary.get("startOdometer"), reports_stops_dictionary.get("endOdometer"), reports_stops_dictionary.get("positionId"), reports_stops_dictionary.get("latitude"), reports_stops_dictionary.get("longitude"), reports_stops_dictionary.get("startTime"), reports_stops_dictionary.get("endTime"), reports_stops_dictionary.get("address"), reports_stops_dictionary.get("duration"), reports_stops_dictionary.get("engineHours"))
+
+            # insert a new user
+            num_reports_stops_added += cursor.execute(add_reports_stops, data_reports_stops)
+        if num_reports_stops_added > 0:
+            print("Successfully added " + str(num_reports_stops_added) + " reports stop row(s) for device ", device)
+        else:
+            print("No data returned from API so no user reports stop added for device ", device)
+
+
 try:
     # connect to costxkm db
     cnx = pymysql.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, db=DB_NAME, charset=DB_CHARSET, cursorclass=pymysql.cursors.DictCursor)
@@ -694,20 +850,33 @@ try:
     # cursor to use for all database inserts
     cursor = cnx.cursor()
 
-    # add_devices(cursor)
-    # add_statistics(cursor)
     # add_attributes(cursor)
+    add_devices(cursor)
     # add_calendars(cursor)
     # add_commands(cursor)
     # add_command_types(cursor)
     # add_drivers(cursor)
+# /events/{id} GET  ?? at end of API Reference and in swagger.json
+# maybe was moved to /reports/events which is returning data ???
     # add_geofences(cursor)
     # add_groups(cursor)
     # add_maintenances(cursor)
     # add_notifications(cursor)
     # add_notification_types(cursor)
     # add_positions(cursor)
-    add_servers(cursor)
+
+    # add_servers(cursor)
+# /session  GET ???  IN API reference but not at bottom of API reference
+    # add_statistics(cursor)
+    # add_users(cursor)
+
+
+    # TODO_LIST
+    add_reports_stops(cursor)
+    # add_reports_events(cursor)
+    # add report_summary(cursor)
+    # add reports_trips(cursor)
+
 
     # commit data to db
     cnx.commit()
